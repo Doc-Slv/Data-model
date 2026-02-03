@@ -1,0 +1,21 @@
+# Tâches - Modèle Prédictif Urgences Hospitalières
+
+- [ ] Initialisation du projet
+    - [x] Créer le plan d'implémentation (`implementation_plan.md`) <!-- id: 1 -->
+    - [x] Récupérer et analyser les fichiers du l'utilisateur (Dataset & PDF) <!-- id: 2 -->
+    - [/] Analyse Exploratoire des Données (EDA)
+    - [x] Charger et nettoyer les données (2012-2016) <!-- id: 3 -->
+    - [x] Documenter la qualité des données (`data_quality_report.md`) <!-- id: 13 -->
+    - [x] Visualiser la saisonnalité et la tendance <!-- id: 4 -->
+- [/] Modélisation ARIMA/SARIMA
+    - [x] Déterminer les paramètres (p, d, q) et (P, D, Q, s) <!-- id: 5 -->
+    - [x] Documenter le modèle retenu (`modeling_report.md`) <!-- id: 14 -->
+    - [ ] Entraîner le modèle sur 2012-2016 et Valider <!-- id: 6 -->
+    - [ ] Valider le modèle (résidus, AIC/BIC) <!-- id: 7 -->
+- [ ] Prévision et Simulation
+    - [ ] Générer les prévisions pour 2017 (Scénario Normal) <!-- id: 8 -->
+    - [ ] Simuler un scénario de Crise Sanitaire <!-- id: 9 -->
+    - [ ] Comparer Normal vs Crise <!-- id: 10 -->
+- [ ] Livrables
+    - [ ] Finaliser le script Python <!-- id: 11 -->
+    - [ ] Générer le rapport/graphiques de prévision <!-- id: 12 -->
