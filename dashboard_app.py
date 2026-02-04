@@ -153,13 +153,22 @@ def main():
         shock_percentage = st.sidebar.slider(
             "Augmentation de la demande (%)", 
             0, 50, 25, 5,
-            help="Ce pourcentage s'ajoute au volume habituel. Exemple : +20% signifie qu'il y aura 120 patients au lieu de 100."
+            help="Multiplicateur de gravité de la crise. 0% = Normal, 50% = Catastrophe majeure."
         )
         shock_intensity = shock_percentage / 100.0
         
         # Affichage de l'impact concret
         extra_patients_approx = int(avg_monthly_normal * shock_intensity)
         st.sidebar.caption(f"💡 Info : +{shock_percentage}% correspond environ à **+{extra_patients_approx} patients supplémentaires** par mois.", unsafe_allow_html=True)
+        
+        # Guide des Scénarios
+        st.sidebar.markdown("""
+        <div style="font-size: 0.85em; color: #7f8c8d; margin-top: 5px;">
+        <strong>Guide des Scénarios :</strong><br>
+        🟢 <strong>10-20%</strong> : Surcharge modérée (Grippe, Report d'activité)<br>
+        🔴 <strong>>40%</strong> : Crise Majeure (Pandémie, Canicule extrême)
+        </div>
+        """, unsafe_allow_html=True)
         
         st.sidebar.markdown("---")
         st.sidebar.info(
