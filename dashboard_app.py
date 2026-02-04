@@ -130,9 +130,36 @@ def main():
         # Sidebar : Paramètres de simulation
         st.sidebar.header("⚙️ Simulation de Crise")
         
-        st.sidebar.subheader("Intensité du Choc")
-        shock_start_month = st.sidebar.slider("Mois de début de crise", 1, 12, 3, format="Mois %d")
-        shock_intensity = st.sidebar.slider("Augmentation de la demande (%)", 0, 50, 25, 5) / 100.0
+        st.sidebar.subheader("Paramètres")
+        
+        # 1. Mois de début (Sélecteur avec noms)
+        month_names = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+        
+        shock_start_month_name = st.sidebar.select_slider(
+            "Mois de début de crise", 
+            options=month_names, 
+            value='Mars',
+            help="Ce paramètre définit à quel moment le choc commence. Avant ce mois, l'activité est normale. À partir de ce mois, le surplus d'activité s'applique."
+        )
+        
+        # Conversion du nom en numéro (1-12)
+        shock_start_month = month_names.index(shock_start_month_name) + 1
+
+        # 2. Intensité (Sélecteur avec contexte)
+        # On calcule d'abord une moyenne mensuelle "normale" pour donner un ordre de grandeur
+        avg_monthly_normal = int(model_results.get_forecast(steps=12).predicted_mean.mean())
+        
+        shock_percentage = st.sidebar.slider(
+            "Augmentation de la demande (%)", 
+            0, 50, 25, 5,
+            help="Ce pourcentage s'ajoute au volume habituel. Exemple : +20% signifie qu'il y aura 120 patients au lieu de 100."
+        )
+        shock_intensity = shock_percentage / 100.0
+        
+        # Affichage de l'impact concret
+        extra_patients_approx = int(avg_monthly_normal * shock_intensity)
+        st.sidebar.caption(f"💡 Info : +{shock_percentage}% correspond environ à **+{extra_patients_approx} patients supplémentaires** par mois.", unsafe_allow_html=True)
         
         st.sidebar.markdown("---")
         st.sidebar.info(
@@ -151,6 +178,7 @@ def main():
 
         # Application de la Simulation Interactives
         shock_factors = np.ones(12)
+        # Ajustement de l'index de début (0-11)
         idx_start = shock_start_month - 1
         if idx_start < 12:
             shock_factors[idx_start] = 1 + (shock_intensity / 2)
@@ -202,17 +230,37 @@ def main():
         fig, ax = plt.subplots(figsize=(12, 6))
         
         df_recent = df[df.index.year >= 2015]
+        
+        # Récupération du dernier point historique pour faire la liaison
+        last_hist_date = df_recent.index[-1]
+        last_hist_value = df_recent['Urgences'].iloc[-1]
+        
+        # Création de séries de plotting qui incluent le point de liaison
+        # On ajoute le dernier point historique au début des prévisions pour qu'elles se touchent
+        plot_forecast_index = pd.Index([last_hist_date]).append(forecast_mean.index)
+        plot_forecast_values = np.concatenate(([last_hist_value], forecast_mean.values))
+        plot_crisis_values = np.concatenate(([last_hist_value], crisis_forecast.values))
+        
+        # Pour les intervalles de confiance, on doit aussi étendre ou gérer le décalage
+        # Ici on va simplement laisser l'IC commencer en Janvier pour ne pas fausser la vue, 
+        # ou on peut artificiellement le fermer au point de liaison (width=0).
+        # Choix : on trace l'IC à partir de Janvier (forecast_mean.index) comme avant pour la clarté.
+        
         ax.plot(df_recent.index, df_recent['Urgences'], label='Historique (2015-2016)', color='black', alpha=0.5)
         
-        ax.plot(forecast_mean.index, forecast_mean, label='Scénario Normal', color='#27ae60', linestyle='--', linewidth=2)
+        # Ligne verticale de séparation
+        ax.axvline(x=last_hist_date, color='gray', linestyle=':', alpha=0.5)
+        ax.text(last_hist_date, ax.get_ylim()[1]*0.95, ' Début Prévision', rotation=90, va='top', fontsize=8, color='gray')
+
+        ax.plot(plot_forecast_index, plot_forecast_values, label='Scénario Normal', color='#27ae60', linestyle='--', linewidth=2)
         ax.fill_between(conf_int.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='#27ae60', alpha=0.1)
         
-        ax.plot(forecast_mean.index, crisis_forecast, label=f'Scénario Crise (+{int(shock_intensity*100)}%)', color='#c0392b', linewidth=3)
+        ax.plot(plot_forecast_index, plot_crisis_values, label=f'Scénario Crise (+{int(shock_intensity*100)}%)', color='#c0392b', linewidth=3)
         ax.fill_between(forecast_mean.index, forecast_mean, crisis_forecast, color='#e74c3c', alpha=0.2, label='Surplus Crise')
 
         ax.set_title("Projection des Admissions aux Urgences", fontsize=14)
         ax.set_ylabel("Admissions / Mois")
-        ax.legend()
+        ax.legend(loc='upper left')
         ax.grid(True, alpha=0.3)
         
         st.pyplot(fig)
