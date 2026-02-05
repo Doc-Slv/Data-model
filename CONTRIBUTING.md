@@ -5,16 +5,16 @@ Ce projet suit une architecture Git professionnelle pour garantir la stabilité 
 ## Branches Principales
 
 *   **`main`** : Branche de production. Contient uniquement du code stable et validé. On ne push jamais directement dessus.
-*   **`preprod`** : Branche d'intégration. C'est ici que toutes les fonctionnalités sont fusionnées pour être testées avant la mise en production.
+*   **`develop`** : Branche d'intégration. C'est ici que toutes les fonctionnalités sont fusionnées pour être testées avant la mise en production.
 
 ## Workflow de Développement
 
 Pour travailler sur une nouvelle tâche (fonctionnalité, bug, etc.) :
 
-1.  **Partez toujours de `preprod`** :
+1.  **Partez toujours de `develop`** :
     ```bash
-    git checkout preprod
-    git pull origin preprod
+    git checkout develop
+    git pull origin develop
     ```
 
 2.  **Créez une branche dédiée** :
@@ -34,18 +34,18 @@ Pour travailler sur une nouvelle tâche (fonctionnalité, bug, etc.) :
     git commit -m "feat: ajout de l'algorithme Monte Carlo"
     ```
 
-4.  **Fusionnez vers `preprod`** :
-    Une fois terminé, fusionnez votre branche dans `preprod` (idéalement via une Pull Request sur GitHub, ou en local si vous êtes seul).
+4.  **Fusionnez vers `develop`** :
+    Une fois terminé, fusionnez votre branche dans `develop` (idéalement via une Pull Request sur GitHub, ou en local si vous êtes seul).
     ```bash
-    git checkout preprod
+    git checkout develop
     git merge --no-ff feat/simulation-monte-carlo
     ```
     *L'option `--no-ff` est importante pour garder une trace de la branche dans l'historique.*
 
 5.  **Mise en Production** :
-    Une fois `preprod` validée, elle est fusionnée vers `main`.
+    Une fois `develop` validée, elle est fusionnée vers `main`.
 
 ## Bonnes Pratiques
 
-*   Ne jamais réécrire l'historique (force push) sur `main` ou `preprod` une fois partagé.
+*   Ne jamais réécrire l'historique (force push) sur `main` ou `develop` une fois partagé.
 *   Supprimez vos branches de features après la fusion pour garder le dépôt propre.
